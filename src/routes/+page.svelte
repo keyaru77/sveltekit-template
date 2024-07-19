@@ -1,7 +1,10 @@
 <script context="module" lang="ts">
   export async function load({ fetch, params }) {
-    const page = params.page || 1;
+    const page = params.page ? params.page : 1;
     const res = await fetch(`https://api.koranime.fun/update/${page}`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch data');
+    }
     const data = await res.json();
     return { props: { data, page } };
   }

@@ -1,32 +1,21 @@
 <script context="module" lang="ts">
-  export async function load({ fetch, params }) {
-    const page = params.page ? params.page : 1;
-    try {
-      const res = await fetch(`https://api.koranime.fun/update/${page}`);
-      if (!res.ok) {
-        console.error('Failed to fetch data:', res.statusText);
-        return { props: { data: null, page, error: res.statusText } };
-      }
-      const data = await res.json();
-      return { props: { data, page, error: null } };
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-      return { props: { data: null, page, error: error.message } };
+  export async function load({ fetch }) {
+    const res = await fetch(`/api/data`);
+    if (!res.ok) {
+      throw new Error('Failed to fetch data');
     }
+    const data = await res.json();
+    return { props: { data } };
   }
 </script>
 
 <script lang="ts">
   export let data;
-  export let page;
-  export let error;
 </script>
 
 <main class="p-4">
-  {#if error}
-    <p class="text-red-500">Error: {error}</p>
-  {:else}
-    <h1 class="text-2xl font-bold mb-4">Latest Updates</h1>
+  <h1 class="text-2xl font-bold mb-4">Latest Updates</h1>
+  {#if data}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {#each data.updates as update}
         <div class="border p-4 rounded-lg">
@@ -38,14 +27,10 @@
         </div>
       {/each}
     </div>
-
     <div class="mt-8 flex justify-between">
-      {#if page > 1}
-        <a href={page - 1 === 1 ? "/" : `/page/${page - 1}`} class="text-blue-500">Previous</a>
-      {/if}
-      {#if data.totalPages > page}
-        <a href={`/page/${page + 1}`} class="text-blue-500">Next</a>
-      {/if}
+      <a href="/page/2" class="text-blue-500">Next</a>
     </div>
+  {:else}
+    <p class="text-red-500">Failed to load data</p>
   {/if}
 </main>
